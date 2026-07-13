@@ -2,15 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const TARGET_OWNER = 'EchoMusicApp';
     const TARGET_REPO = 'Lossless';
     const GITHUB_API_URL = 'https://api.github.com';
-    const CANVAS_JSON_URL = 'https://raw.githubusercontent.com/EchoMusicApp/Lossless/main/music.json';
+    const TRACK_JSON_URL = 'https://raw.githubusercontent.com/EchoMusicApp/Lossless/main/music.json';
 
     let gitHubAccessToken = localStorage.getItem('gh_access_token') || null;
     let gitHubUsername = null;
     let selectedFile = null;
     let fileIsValid = false;
-    let canvasSourceMode = 'upload'; 
+    let trackSourceMode = 'upload'; 
     let selectedExistingUrl = null;
-    let allCanvasItems = []; 
+    let allTrackItems = []; 
 
     const loginSection  = document.getElementById('login-section');
     const formSection   = document.getElementById('form-section');
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userNameEl  = document.getElementById('user-name');
 
     const destDirRadios     = document.querySelectorAll('input[name="dest-dir"]');
-    const canvasSourceRadios = document.querySelectorAll('input[name="canvas-source"]');
+    const trackSourceRadios = document.querySelectorAll('input[name="canvas-source"]');
 
     const uploadPanel    = document.getElementById('upload-panel');
     const fileInput      = document.getElementById('file-input');
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addSongBtn      = document.getElementById('add-song-btn');
     const songCountBadge  = document.getElementById('song-count-badge');
 
-    const submitBtn = document.getElementById('submit-canvas-btn');
+    const submitBtn = document.getElementById('submit-track-btn');
 
     const statusLoader      = document.getElementById('status-loader');
     const statusSuccessIcon = document.getElementById('status-success-icon');
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusSection.style.display = 'none';
             formSection.style.display   = 'block';
 
-            await loadCanvasItems();
+            await loadTrackItems();
             resetUploadForm();
         } catch (error) {
             console.error('Session Init Error:', error);
@@ -138,7 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.location.protocol === 'file:') {
                 statusUrl = 'https://lossless.echomusic.fun/api/auth/status';
             }
-            const res  = await fetch(statusUrl);
+            statusUrl += '?_t=' + Date.now();
+            const res  = await fetch(statusUrl, { cache: 'no-store' });
             if (!res.ok) throw new Error();
             const data = await res.json();
             loginLimitBanner.style.display = 'block';
@@ -156,27 +157,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadCanvasItems() {
+    async function loadTrackItems() {
         try {
-            const res  = await fetch(CANVAS_JSON_URL);
+            const res  = await fetch(TRACK_JSON_URL);
             if (!res.ok) return;
             const data = await res.json();
             if (data.items && Array.isArray(data.items)) {
                 const seen = new Set();
-                allCanvasItems = data.items.filter(item => {
+                allTrackItems = data.items.filter(item => {
                     if (seen.has(item.url)) return false;
                     seen.add(item.url);
                     return true;
                 });
             }
         } catch (e) {
-            console.warn('Could not load canvas.json for search:', e);
+            console.warn('Could not load music.json for search:', e);
         }
     }
 
     function resetUploadForm() {
-        document.getElementById('source-upload').checked = true;
-        canvasSourceMode = 'upload';
+        
+        trackSourceMode = 'upload';
         uploadPanel.style.display   = 'block';
         existingPanel.style.display = 'none';
 
@@ -193,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         existingResults.innerHTML            = '';
         existingSelectedBanner.style.display = 'none';
 
-        document.getElementById('type-song').checked = true;
+        
 
         songEntriesList.innerHTML = '';
         addSongEntry();
@@ -205,10 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.addEventListener('change', () => updateSubmitButtonState());
     });
 
-    canvasSourceRadios.forEach(radio => {
+    trackSourceRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            canvasSourceMode = radio.value;
-            if (canvasSourceMode === 'upload') {
+            trackSourceMode = radio.value;
+            if (trackSourceMode === 'upload') {
                 uploadPanel.style.display   = 'block';
                 existingPanel.style.display = 'none';
             } else {
@@ -348,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
             existingResults.innerHTML     = '';
             return;
         }
-        const matches = allCanvasItems.filter(item =>
+        const matches = allTrackItems.filter(item =>
             item.song.toLowerCase().includes(q)   ||
             item.artist.toLowerCase().includes(q) ||
             item.url.toLowerCase().includes(q)
@@ -373,12 +374,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         existingResults.querySelectorAll('.existing-result-item').forEach(btn => {
             btn.addEventListener('click', () => {
-                selectExistingCanvas(btn.dataset.url, btn.dataset.label);
+                selectExistingTrack(btn.dataset.url, btn.dataset.label);
             });
         });
     }
 
-    function selectExistingCanvas(url, label) {
+    function selectExistingTrack(url, label) {
         selectedExistingUrl = url;
         existingSelectedTitle.textContent  = label;
         existingSelectedUrlEl.textContent  = shortenUrl(url);
@@ -571,21 +572,21 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         const hasSongs = validEntries.length > 0 && validEntries.length === entries.length;
 
-        let canvasReady = false;
-        if (canvasSourceMode === 'upload') {
-            canvasReady = !!(selectedFile && fileIsValid);
+        let trackReady = false;
+        if (trackSourceMode === 'upload') {
+            trackReady = !!(selectedFile && fileIsValid);
         } else {
-            canvasReady = !!selectedExistingUrl;
+            trackReady = !!selectedExistingUrl;
         }
 
-        submitBtn.disabled = !(hasSongs && canvasReady);
+        submitBtn.disabled = !(hasSongs && trackReady);
     }
 
     submitBtn.addEventListener('click', async () => {
         if (submitBtn.disabled) return;
 
         const entries  = getSongEntries();
-        const destDir  = document.querySelector('input[name="dest-dir"]:checked').value;
+        const destDir = "Music";
 
         for (const entry of entries) {
             if (/[<>]/g.test(entry.song) || /[<>]/g.test(entry.artist)) {
@@ -597,10 +598,10 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoadingView();
 
         try {
-            if (canvasSourceMode === 'upload') {
+            if (trackSourceMode === 'upload') {
                 await submitWithNewUpload(entries, destDir);
             } else {
-                await submitWithExistingCanvas(entries, destDir);
+                await submitWithExistingTrack(entries, destDir);
             }
         } catch (error) {
             console.error('Submission error:', error);
@@ -614,38 +615,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const cleanName    = sanitizedOriginalName.split('.')[0];
         const newFilename  = `${gitHubUsername.toLowerCase()}-${sanitizedOriginalName}`;
         const targetPath   = `Music/${newFilename}`;
-        const canvasUrl    = `https://lossless.echomusic.fun/${targetPath}`;
+        const trackUrl    = `https://lossless.echomusic.fun/${targetPath}`;
         const branchName   = `lossless-${gitHubUsername.toLowerCase()}-${cleanName}`;
 
         const forkOwner = await forkAndSync(branchName, primaryEntry.song);
 
-        updateLoadingMessage('Uploading Visualizer', `Uploading video: ${newFilename}…`);
-        const base64Video = await readFileAsBase64(selectedFile);
+        updateLoadingMessage('Uploading Track', `Uploading audio: ${newFilename}…`);
+        const base64Audio = await readFileAsBase64(selectedFile);
 
         const uploadRes = await fetch(`${GITHUB_API_URL}/repos/${forkOwner}/${TARGET_REPO}/contents/${targetPath}`, {
             method: 'PUT',
             headers: buildHeaders(),
             body: JSON.stringify({
                 message: `feat: upload lossless track for ${primaryEntry.song}`,
-                content: base64Video,
+                content: base64Audio,
                 branch: branchName
             })
         });
-        if (!uploadRes.ok) throw new Error('Failed to upload the visualizer file to your fork.');
+        if (!uploadRes.ok) throw new Error('Failed to upload the lossless file to your fork.');
 
-        await updateCanvasJson(forkOwner, branchName, entries, canvasUrl);
+        await updateTrackJson(forkOwner, branchName, entries, trackUrl);
         const prUrl = await openPullRequest(forkOwner, branchName, entries, destDir, targetPath);
         showSuccessState(prUrl);
     }
 
-    async function submitWithExistingCanvas(entries, destDir) {
+    async function submitWithExistingTrack(entries, destDir) {
         const primaryEntry = entries[0];
         const slug        = primaryEntry.song.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30);
         const branchName  = `lossless-${gitHubUsername.toLowerCase()}-${slug}-link`;
 
         const forkOwner = await forkAndSync(branchName, primaryEntry.song);
 
-        await updateCanvasJson(forkOwner, branchName, entries, selectedExistingUrl);
+        await updateTrackJson(forkOwner, branchName, entries, selectedExistingUrl);
         const prUrl = await openPullRequest(forkOwner, branchName, entries, destDir, selectedExistingUrl);
         showSuccessState(prUrl);
     }
@@ -696,30 +697,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return forkOwner;
     }
 
-    async function updateCanvasJson(forkOwner, branchName, entries, canvasVideoUrl) {
+    async function updateTrackJson(forkOwner, branchName, entries, trackAudioUrl) {
         updateLoadingMessage('Updating Database', `Adding ${entries.length} song entr${entries.length === 1 ? 'y' : 'ies'} to music.json…`);
 
-        const canvasApiUrl = `${GITHUB_API_URL}/repos/${forkOwner}/${TARGET_REPO}/contents/music.json?ref=${branchName}`;
-        const canvasRes = await fetch(canvasApiUrl, { headers: buildHeaders() });
-        if (!canvasRes.ok) throw new Error('Failed to download music.json from your fork.');
+        const trackApiUrl = `${GITHUB_API_URL}/repos/${forkOwner}/${TARGET_REPO}/contents/music.json?ref=${branchName}`;
+        const trackRes = await fetch(trackApiUrl, { headers: buildHeaders() });
+        if (!trackRes.ok) throw new Error('Failed to download music.json from your fork.');
 
-        const canvasData    = await canvasRes.json();
-        const canvasSha     = canvasData.sha;
-        const canvasContent = decodeBase64Utf8(canvasData.content);
-        const canvasObj     = JSON.parse(canvasContent);
+        const trackData    = await trackRes.json();
+        const trackSha     = trackData.sha;
+        const trackContent = decodeBase64Utf8(trackData.content);
+        const trackObj     = JSON.parse(trackContent);
 
-        if (!canvasObj.items || !Array.isArray(canvasObj.items)) {
+        if (!trackObj.items || !Array.isArray(trackObj.items)) {
             throw new Error('music.json items database is missing or corrupt.');
         }
 
         const newEntries = entries.map(entry => ({
             song:   entry.song,
             artist: entry.artist,
-            url:    canvasVideoUrl
+            url:    trackAudioUrl
         }));
-        canvasObj.items.unshift(...newEntries);
+        trackObj.items.unshift(...newEntries);
 
-        const updatedContent = encodeBase64Utf8(JSON.stringify(canvasObj, null, 2) + '\n');
+        const updatedContent = encodeBase64Utf8(JSON.stringify(trackObj, null, 2) + '\n');
 
         const updateRes = await fetch(`${GITHUB_API_URL}/repos/${forkOwner}/${TARGET_REPO}/contents/music.json`, {
             method: 'PUT',
@@ -727,14 +728,14 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({
                 message: `feat: update music.json — add ${entries.length} song(s)`,
                 content: updatedContent,
-                sha:     canvasSha,
+                sha:     trackSha,
                 branch:  branchName
             })
         });
         if (!updateRes.ok) throw new Error('Failed to write updated music.json to your fork.');
     }
 
-    async function openPullRequest(forkOwner, branchName, entries, destDir, canvasPath) {
+    async function openPullRequest(forkOwner, branchName, entries, destDir, trackPath) {
         updateLoadingMessage('Submitting Contribution', 'Opening Pull Request on the upstream repository…');
 
         const isSingle = entries.length === 1;
@@ -746,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `| ${e.song} | ${e.artist} |`
         ).join('\n');
 
-        const prBody = `This Pull Request was submitted automatically via the Echo Music Lossless portal.\n\n### 🎵 Submission Metadata\n* **Category:** ${destDir}\n* **Track URL / Path:** \`${canvasPath}\`\n* **Total Songs Linked:** ${entries.length}\n\n### 🎶 Song Entries\n| Song Title | Artist |\n|---|---|\n${songTable}\n\n*Validation checks will run automatically on this contribution.*`;
+        const prBody = `This Pull Request was submitted automatically via the Echo Music Lossless portal.\n\n### 🎵 Submission Metadata\n* **Category:** ${destDir}\n* **Track URL / Path:** \`${trackPath}\`\n* **Total Songs Linked:** ${entries.length}\n\n### 🎶 Song Entries\n| Song Title | Artist |\n|---|---|\n${songTable}\n\n*Validation checks will run automatically on this contribution.*`;
 
         const prRes = await fetch(`${GITHUB_API_URL}/repos/${TARGET_OWNER}/${TARGET_REPO}/pulls`, {
             method: 'POST',

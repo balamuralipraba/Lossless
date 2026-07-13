@@ -74,8 +74,8 @@
             <h2 class="section-title">API Reference</h2>
 
             <div class="dev-card">
-                <h3><i class="fas fa-database"></i> Canvas Database URL</h3>
-                <p>The primary endpoint to fetch the complete canvas database:</p>
+                <h3><i class="fas fa-database"></i> Lossless Database URL</h3>
+                <p>The primary endpoint to fetch the complete lossless database:</p>
                 <div class="code-block">
                     <div class="code-header">
                         <span class="code-lang">ENDPOINT</span>
@@ -113,7 +113,7 @@
                             <tr><th>Field</th><th>Type</th><th>Description</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code>items</code></td><td>Array</td><td>The list of all canvas entries</td></tr>
+                            <tr><td><code>items</code></td><td>Array</td><td>The list of all track entries</td></tr>
                             <tr><td><code>items[].song</code></td><td>String</td><td>The song title (case-sensitive as contributed)</td></tr>
                             <tr><td><code>items[].artist</code></td><td>String</td><td>The artist or band name</td></tr>
                             <tr><td><code>items[].url</code></td><td>String</td><td>Direct URL to the audio file (<code>.flac</code>)</td></tr>
@@ -130,7 +130,7 @@
             
             <div class="dev-card">
                 <h3><i class="fab fa-js-square"></i> JavaScript / Web</h3>
-                <p>Fetch the database and find a canvas for a playing song:</p>
+                <p>Fetch the database and find a track for a playing song:</p>
                 <div class="code-block">
                     <div class="code-header">
                         <span class="code-lang">JavaScript</span>
@@ -138,14 +138,14 @@
                     </div>
                     <pre><code>const DATABASE_URL = 'https://lossless.echomusic.fun/music.json';
 
-// Fetch and cache the canvas database
+// Fetch and cache the lossless database
 async function loadDB() {
   const res = await fetch(DATABASE_URL);
   const data = await res.json();
   return data.items || [];
 }
 
-// Find a canvas for a given song + artist
+// Find a track for a given song + artist
 function findTrack(items, songTitle, artistName) {
   const query = `${songTitle} ${artistName}`.toLowerCase();
   return items.find(item => {
@@ -168,8 +168,8 @@ if (match) {
 
             
             <div class="dev-card">
-                <h3><i class="fas fa-play-circle"></i> HTML Video Player</h3>
-                <p>A minimal HTML structure to render a canvas behind your music player:</p>
+                <h3><i class="fas fa-play-circle"></i> HTML Audio Player</h3>
+                <p>A minimal HTML structure to play a lossless track in your music player:</p>
                 <div class="code-block">
                     <div class="code-header">
                         <span class="code-lang">HTML</span>
@@ -191,7 +191,7 @@ if (match) {
             
             <div class="dev-card">
                 <h3><i class="fab fa-android"></i> Android / Kotlin</h3>
-                <p>Use <code>ExoPlayer</code> to play canvas videos in your Android app:</p>
+                <p>Use <code>ExoPlayer</code> to play lossless audio in your Android app:</p>
                 <div class="code-block">
                     <div class="code-header">
                         <span class="code-lang">Kotlin</span>
@@ -232,7 +232,7 @@ fun playAudio(url: String, playerView: PlayerView) {
             
             <div class="dev-card">
                 <h3><i class="fab fa-apple"></i> iOS / Swift</h3>
-                <p>Use <code>AVPlayer</code> to play canvas videos in your iOS app:</p>
+                <p>Use <code>AVPlayer</code> to play lossless audio in your iOS app:</p>
                 <div class="code-block">
                     <div class="code-header">
                         <span class="code-lang">Swift</span>
@@ -280,16 +280,16 @@ func playAudio(urlString: String) {
                     </div>
                     <pre><code>import requests
 
-CANVAS_URL = "https://lossless.echomusic.fun/music.json"
+TRACK_URL = "https://lossless.echomusic.fun/music.json"
 
 def load_db():
     """Fetch the full track database."""
-    response = requests.get(CANVAS_URL)
+    response = requests.get(TRACK_URL)
     response.raise_for_status()
     return response.json().get("items", [])
 
-def find_canvas(items, song_title, artist_name):
-    """Find a matching canvas entry."""
+def find_track(items, song_title, artist_name):
+    """Find a matching track entry."""
     query = f"{song_title} {artist_name}".lower()
     for item in items:
         entry = f"{item['song']} {item['artist']}".lower()
@@ -299,7 +299,7 @@ def find_canvas(items, song_title, artist_name):
 
 # Example usage
 db = load_db()
-track = find_canvas(db, "Starboy (feat. Daft Punk)", "The Weeknd")
+track = find_track(db, "Starboy (feat. Daft Punk)", "The Weeknd")
 if track:
     print(f"Track URL: {track['url']}")
 </code></pre>
@@ -344,7 +344,7 @@ if track:
                         <div class="info-icon"><i class="fas fa-check-circle"></i></div>
                         <div>
                             <strong>Open Source</strong>
-                            <p>The canvas database is GPL-3.0 licensed. You're free to use it in any project — commercial or personal.</p>
+                            <p>The lossless database is GPL-3.0 licensed. You're free to use it in any project — commercial or personal.</p>
                         </div>
                     </div>
                     <div class="dev-info-item">
@@ -365,7 +365,7 @@ if track:
                         <div class="info-icon"><i class="fas fa-users"></i></div>
                         <div>
                             <strong>Contribute Back</strong>
-                            <p>If your users discover new canvases, encourage them to submit via the <a href="contribute.html">Contribute Portal</a> so the whole community benefits.</p>
+                            <p>If your users discover new tracks, encourage them to submit via the <a href="contribute.html">Contribute Portal</a> so the whole community benefits.</p>
                         </div>
                     </div>
                 </div>

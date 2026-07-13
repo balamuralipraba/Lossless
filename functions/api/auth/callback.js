@@ -64,6 +64,15 @@ export async function onRequest(context) {
       });
     }
 
+    const kv = env.CANVAS_PORTAL_KV;
+    if (kv) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const kvKey = `logins:${todayStr}`;
+      const countStr = await kv.get(kvKey);
+      const count = countStr ? parseInt(countStr, 10) : 0;
+      await kv.put(kvKey, (count + 1).toString(), { expirationTtl: 129600 });
+    }
+
     return new Response(null, {
       status: 302,
       headers: {

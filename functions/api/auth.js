@@ -25,8 +25,6 @@ export async function onRequest(context) {
         }
       });
     }
-
-    await kv.put(kvKey, (count + 1).toString(), { expirationTtl: 129600 });
   }
 
   const state = Math.random().toString(36).substring(2, 15);

@@ -489,7 +489,7 @@ header p {
     gap: 1rem;
 }
 
-.canvas-card {
+.track-card {
     background: #ffffff;
     border: 1px solid var(--card-border);
     border-radius: 16px;
@@ -502,13 +502,13 @@ header p {
     box-shadow: var(--shadow-soft);
 }
 
-.canvas-card:hover {
+.track-card:hover {
     transform: translateY(-2px);
     border-color: var(--card-hover-border);
     box-shadow: var(--shadow-hover);
 }
 
-.video-preview {
+.audio-preview {
     width: 64px;
     height: 64px;
     min-width: 64px;
@@ -518,7 +518,7 @@ header p {
     overflow: hidden;
 }
 
-.video-preview video {
+.audio-preview audio {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -526,14 +526,14 @@ header p {
     transition: var(--transition);
 }
 
-.canvas-card:hover video {
+.track-card:hover audio {
     opacity: 1;
 }
 
-.video-preview::after {
-    content: '\f144';
+.audio-preview::after {
+    content: '\f028';
     font-family: 'Font Awesome 6 Free';
-    font-weight: 400;
+    font-weight: 900;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -545,7 +545,7 @@ header p {
     pointer-events: none;
 }
 
-.canvas-card:hover .video-preview::after {
+.track-card:hover .audio-preview::after {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
 }
